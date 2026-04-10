@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Radiant AI — Votre entreprise, amplifiée par l'IA</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Inter:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" />
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary:   '#34435E',
+            secondary: '#4A6D9C',
+            accent:    '#FF7B27',
+            bg:        '#F5F0E8',
+            surface:   '#1E3A52',
+            ink:       '#424F4A',
+            muted:     '#8A9299',
+          },
+          fontFamily: {
+            heading: ['Outfit', 'sans-serif'],
+            body:    ['Inter', 'sans-serif'],
+          },
+        }
+      }
+    }
+  </script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      background-color: #F5F0E8;
+      font-family: 'Inter', sans-serif;
+      color: #424F4A;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    /* Noise texture overlay */
+    .noise-layer::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Layered shadows */
+    .shadow-card {
+      box-shadow:
+        0 1px 2px rgba(52,67,94,0.04),
+        0 4px 12px rgba(52,67,94,0.07),
+        0 16px 40px rgba(52,67,94,0.10);
+    }
+    .shadow-card-hover {
+      box-shadow:
+        0 2px 4px rgba(52,67,94,0.05),
+        0 8px 24px rgba(52,67,94,0.12),
+        0 24px 56px rgba(52,67,94,0.14);
+    }
+    .shadow-accent {
+      box-shadow:
+        0 2px 8px  rgba(255,123,39,0.20),
+        0 8px 24px rgba(255,123,39,0.28);
+    }
+    .shadow-dark {
+      box-shadow:
+        0 2px 8px  rgba(30,58,82,0.20),
+        0 12px 36px rgba(30,58,82,0.32);
+    }
+
+    /* Heading tracking */
+    .track-tight { letter-spacing: -0.03em; }
+
+    /* Spring easing */
+    .ease-spring { transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1); }
+
+    /* Smooth nav */
+    .nav-link {
+      position: relative;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: #424F4A;
+      transition: color 0.2s;
+    }
+    .nav-link:hover { color: #34435E; }
+    .nav-link:focus-visible { outline: 2px solid #FF7B27; outline-offset: 3px; border-radius: 4px; }
+    .nav-link::after {
+      content: '';
+      position: absolute;
+      bottom: -2px; left: 0; right: 0;
+      height: 1px;
+      background: #FF7B27;
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .nav-link:hover::after { transform: scaleX(1); }
+
+    /* CTA primary */
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.875rem 1.75rem;
+      border-radius: 9999px;
+      background: #34435E;
+      color: white;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 600;
+      font-size: 0.875rem;
+      transition: transform 0.2s, background-color 0.2s, box-shadow 0.2s;
+      transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .btn-primary:hover  { background: #FF7B27; }
+    .btn-primary:active { transform: scale(0.97); }
+    .btn-primary:focus-visible { outline: 2px solid #FF7B27; outline-offset: 3px; }
+
+    /* CTA accent */
+    .btn-accent {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 1rem 2rem;
+      border-radius: 9999px;
+      background: #FF7B27;
+      color: white;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 600;
+      font-size: 0.9375rem;
+      transition: transform 0.2s, background-color 0.2s, color 0.2s;
+      transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .btn-accent:hover  { background: white; color: #34435E; }
+    .btn-accent:active { transform: scale(0.97); }
+    .btn-accent:focus-visible { outline: 2px solid white; outline-offset: 3px; }
+
+    /* Ghost button */
+    .btn-ghost {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.875rem 1.75rem;
+      border-radius: 9999px;
+      border: 1.5px solid rgba(52,67,94,0.25);
+      color: #34435E;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 600;
+      font-size: 0.875rem;
+      transition: border-color 0.2s, background-color 0.2s, transform 0.2s;
+      transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .btn-ghost:hover  { border-color: #34435E; background: rgba(52,67,94,0.05); }
+    .btn-ghost:active { transform: scale(0.97); }
+    .btn-ghost:focus-visible { outline: 2px solid #34435E; outline-offset: 3px; }
+
+    /* Service card */
+    .service-card {
+      transition: transform 0.3s, box-shadow 0.3s;
+      transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .service-card:hover {
+      transform: translateY(-6px);
+      box-shadow:
+        0 2px 4px rgba(52,67,94,0.05),
+        0 8px 24px rgba(52,67,94,0.12),
+        0 24px 56px rgba(52,67,94,0.14);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ═══════════════ NAV ═══════════════ -->
+  <header class="fixed top-0 left-0 right-0 z-50" style="background: rgba(245,240,232,0.88); backdrop-filter: blur(16px); border-bottom: 1px solid rgba(52,67,94,0.08);">
+    <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+      <a href="#" aria-label="Radiant AI - Accueil">
+        <img src="brand_assets/logo-transparent.png" alt="Radiant AI" style="height:64px;width:auto;" />
+      </a>
+      <nav class="hidden md:flex items-center gap-8">
+        <a href="#services"  class="nav-link">Services</a>
+        <a href="#processus" class="nav-link">Processus</a>
+        <a href="#apropos"   class="nav-link">À propos</a>
+        <a href="#temoignages" class="nav-link">Clients</a>
+      </nav>
+      <a href="#contact" class="btn-primary shadow-card">
+        Prendre rendez-vous
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7h9M8 3.5l3.5 3.5L8 10.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+    </div>
+  </header>
+
+
+  <!-- ═══════════════ HERO ═══════════════ -->
+  <section class="relative noise-layer min-h-screen flex items-center overflow-hidden pt-16">
+
+    <!-- Gradient blobs -->
+    <div class="absolute inset-0 pointer-events-none" aria-hidden="true">
+      <div style="position:absolute; top:-15%; right:-8%; width:680px; height:680px; border-radius:50%; background:radial-gradient(circle, rgba(74,109,156,0.16) 0%, transparent 68%);"></div>
+      <div style="position:absolute; bottom:-12%; left:-6%; width:520px; height:520px; border-radius:50%; background:radial-gradient(circle, rgba(255,123,39,0.11) 0%, transparent 65%);"></div>
+      <div style="position:absolute; top:35%; left:38%; width:380px; height:380px; border-radius:50%; background:radial-gradient(circle, rgba(52,67,94,0.05) 0%, transparent 70%);"></div>
+    </div>
+
+    <div class="relative z-10 max-w-6xl mx-auto px-6 py-28 grid md:grid-cols-2 gap-16 items-center w-full">
+
+      <!-- Left: copy -->
+      <div>
+        <!-- Badge -->
+        <div style="display:inline-flex; align-items:center; gap:8px; padding:6px 14px; border-radius:9999px; background:rgba(255,123,39,0.10); border:1px solid rgba(255,123,39,0.22); margin-bottom:2rem;">
+          <span style="width:7px; height:7px; border-radius:50%; background:#FF7B27; display:inline-block;"></span>
+          <span style="font-size:0.6875rem; font-weight:700; color:#FF7B27; letter-spacing:0.1em; text-transform:uppercase; font-family:'Outfit',sans-serif;">Intelligence Artificielle</span>
+        </div>
+
+        <h1 class="font-heading font-extrabold text-primary track-tight" style="font-size:clamp(2.4rem,4.8vw,3.75rem); line-height:1.06; margin-bottom:1.5rem;">
+          Votre entreprise,<br>
+          <span style="color:#FF7B27;">amplifiée</span> par l'IA
+        </h1>
+
+        <p style="font-size:1.0625rem; line-height:1.78; color:#424F4A; max-width:26rem; margin-bottom:2.5rem;">
+          Radiant AI conçoit des agents intelligents qui automatisent vos processus métier — pour que vous vous concentriez sur ce qui crée vraiment de la valeur.
+        </p>
+
+        <div style="display:flex; flex-wrap:wrap; gap:0.875rem; margin-bottom:3.5rem;">
+          <a href="#services" class="btn-primary shadow-card">
+            Découvrir nos solutions
+            <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M2.5 7.5h10M9 3.5l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </a>
+          <a href="#contact" class="btn-ghost">
+            Prendre rendez-vous
+          </a>
+        </div>
+
+        <!-- Stats -->
+        <div style="display:flex; gap:2.5rem; padding-top:2rem; border-top:1px solid rgba(52,67,94,0.10);">
+          <div>
+            <div class="font-heading font-extrabold text-primary track-tight" style="font-size:1.875rem;">95%</div>
+            <div style="font-size:0.75rem; color:#8A9299; line-height:1.4; margin-top:2px;">de tâches<br>automatisées</div>
+          </div>
+          <div>
+            <div class="font-heading font-extrabold text-primary track-tight" style="font-size:1.875rem;">3×</div>
+            <div style="font-size:0.75rem; color:#8A9299; line-height:1.4; margin-top:2px;">plus rapide<br>en moyenne</div>
+          </div>
+          <div>
+            <div class="font-heading font-extrabold text-primary track-tight" style="font-size:1.875rem;">48h</div>
+            <div style="font-size:0.75rem; color:#8A9299; line-height:1.4; margin-top:2px;">pour un premier<br>prototype</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: UI mockup -->
+      <div class="hidden md:block">
+        <div class="relative rounded-2xl overflow-hidden shadow-dark" style="background:linear-gradient(145deg,#1E3A52 0%,#2a4a6a 100%);">
+          <!-- Inner glow -->
+          <div style="position:absolute; top:0; right:0; width:220px; height:220px; border-radius:50%; background:radial-gradient(circle,rgba(255,123,39,0.18) 0%,transparent 68%); transform:translate(35%,-35%); pointer-events:none;"></div>
+          <div style="position:absolute; bottom:0; left:0; width:160px; height:160px; border-radius:50%; background:radial-gradient(circle,rgba(74,109,156,0.2) 0%,transparent 70%); transform:translate(-30%,30%); pointer-events:none;"></div>
+
+          <div style="position:relative; z-index:1; padding:2rem;">
+            <!-- Header row -->
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1.25rem;">
+              <span style="font-family:'Outfit',sans-serif; font-size:0.6875rem; font-weight:700; color:#FF7B27; letter-spacing:0.1em; text-transform:uppercase;">Automatisation active</span>
+              <span style="display:inline-flex; align-items:center; gap:5px; font-size:0.6875rem; color:rgba(255,255,255,0.4);">
+                <span style="width:6px;height:6px;border-radius:50%;background:#34d399;display:inline-block;"></span> En ligne
+              </span>
+            </div>
+
+            <!-- Agent rows -->
+            <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:1.25rem;">
+
+              <div style="display:flex; align-items:center; gap:12px; background:rgba(255,255,255,0.07); border-radius:14px; padding:12px 14px;">
+                <div style="width:34px;height:34px;border-radius:10px;background:rgba(255,123,39,0.18);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 2v4l2.5 1.5" stroke="#FF7B27" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="8" r="6" stroke="#FF7B27" stroke-width="1.5"/></svg>
+                </div>
+                <div style="flex:1;">
+                  <div style="font-size:0.8125rem;font-weight:500;color:white;font-family:'Outfit',sans-serif;">Traitement des emails</div>
+                  <div style="font-size:0.6875rem;color:#8A9299;margin-top:2px;">247 emails triés aujourd'hui</div>
+                </div>
+                <div style="width:7px;height:7px;border-radius:50%;background:#34d399;flex-shrink:0;"></div>
+              </div>
+
+              <div style="display:flex; align-items:center; gap:12px; background:rgba(255,255,255,0.07); border-radius:14px; padding:12px 14px;">
+                <div style="width:34px;height:34px;border-radius:10px;background:rgba(74,109,156,0.25);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="10" rx="2" stroke="#4A6D9C" stroke-width="1.5"/><path d="M5 7h6M5 9.5h4" stroke="#4A6D9C" stroke-width="1.25" stroke-linecap="round"/></svg>
+                </div>
+                <div style="flex:1;">
+                  <div style="font-size:0.8125rem;font-weight:500;color:white;font-family:'Outfit',sans-serif;">Génération de rapports</div>
+                  <div style="font-size:0.6875rem;color:#8A9299;margin-top:2px;">Rapport mensuel — complété</div>
+                </div>
+                <div style="width:7px;height:7px;border-radius:50%;background:#34d399;flex-shrink:0;"></div>
+              </div>
+
+              <div style="display:flex; align-items:center; gap:12px; background:rgba(255,255,255,0.07); border-radius:14px; padding:12px 14px;">
+                <div style="width:34px;height:34px;border-radius:10px;background:rgba(255,123,39,0.18);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l3 3 7-7" stroke="#FF7B27" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </div>
+                <div style="flex:1;">
+                  <div style="font-size:0.8125rem;font-weight:500;color:white;font-family:'Outfit',sans-serif;">Qualification des leads</div>
+                  <div style="font-size:0.6875rem;color:#8A9299;margin-top:2px;">18 leads qualifiés ce matin</div>
+                </div>
+                <div style="width:7px;height:7px;border-radius:50%;background:#34d399;flex-shrink:0;"></div>
+              </div>
+            </div>
+
+            <!-- Progress bar -->
+            <div style="background:rgba(255,255,255,0.06);border-radius:14px;padding:16px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+                <span style="font-size:0.8125rem;font-weight:500;color:white;font-family:'Outfit',sans-serif;">Efficacité globale</span>
+                <span style="font-size:0.875rem;font-weight:700;color:#FF7B27;font-family:'Outfit',sans-serif;">+94%</span>
+              </div>
+              <div style="height:6px;background:rgba(255,255,255,0.08);border-radius:9999px;overflow:hidden;">
+                <div style="height:100%;width:94%;border-radius:9999px;background:linear-gradient(90deg,#4A6D9C,#FF7B27);"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════ SERVICES ═══════════════ -->
+  <section id="services" class="py-28 relative overflow-hidden">
+    <div class="absolute inset-0 pointer-events-none" aria-hidden="true">
+      <div style="position:absolute;top:0;left:50%;transform:translateX(-50%);width:900px;height:500px;background:radial-gradient(ellipse,rgba(52,67,94,0.04) 0%,transparent 65%);"></div>
+    </div>
+    <div class="max-w-6xl mx-auto px-6 relative z-10">
+
+      <!-- Section header -->
+      <div style="text-align:center;margin-bottom:4rem;">
+        <div style="display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border-radius:9999px;background:rgba(52,67,94,0.07);border:1px solid rgba(52,67,94,0.12);margin-bottom:1.25rem;">
+          <span style="font-size:0.6875rem;font-weight:700;color:#34435E;letter-spacing:0.1em;text-transform:uppercase;font-family:'Outfit',sans-serif;">Nos services</span>
+        </div>
+        <h2 class="font-heading font-bold text-primary track-tight" style="font-size:clamp(1.875rem,3.5vw,2.75rem);margin-bottom:1rem;line-height:1.12;">
+          Des solutions IA pour chaque<br>étape de votre croissance
+        </h2>
+        <p style="color:#8A9299;line-height:1.75;max-width:34rem;margin:0 auto;">
+          De l'automatisation simple aux agents complexes — nous construisons ce dont vous avez besoin, sans surcomplexité.
+        </p>
+      </div>
+
+      <!-- Cards grid -->
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:1.25rem;">
+
+        <!-- Card 1 — Light -->
+        <div class="service-card rounded-2xl p-8 bg-white shadow-card" style="border:1px solid rgba(52,67,94,0.08);">
+          <div style="width:48px;height:48px;border-radius:14px;background:rgba(255,123,39,0.10);display:flex;align-items:center;justify-content:center;margin-bottom:1.5rem;transition:background 0.2s;" onmouseover="this.style.background='rgba(255,123,39,0.18)'" onmouseout="this.style.background='rgba(255,123,39,0.10)'">
+            <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M11 2L2 14h9l-1 8 10-13h-9z" stroke="#FF7B27" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <h3 class="font-heading font-bold text-primary track-tight" style="font-size:1.25rem;margin-bottom:0.75rem;">Automatisation des workflows</h3>
+          <p style="color:#8A9299;line-height:1.75;font-size:0.9375rem;">Éliminez les tâches répétitives avec des agents IA qui travaillent 24h/24, sans erreur, sans fatigue.</p>
+        </div>
+
+        <!-- Card 2 — Dark featured -->
+        <div class="service-card relative rounded-2xl p-8 overflow-hidden shadow-dark" style="background:linear-gradient(145deg,#1E3A52 0%,#2a4a6a 100%);">
+          <div style="position:absolute;top:0;right:0;width:180px;height:180px;border-radius:50%;background:radial-gradient(circle,rgba(255,123,39,0.16) 0%,transparent 68%);transform:translate(35%,-35%);pointer-events:none;"></div>
+          <div style="position:relative;z-index:1;">
+            <div style="width:48px;height:48px;border-radius:14px;background:rgba(255,123,39,0.18);display:flex;align-items:center;justify-content:center;margin-bottom:1.5rem;">
+              <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="3" stroke="#FF7B27" stroke-width="1.75"/><path d="M11 2v2.5M11 17.5V20M2 11h2.5M17.5 11H20M4.93 4.93l1.77 1.77M15.3 15.3l1.77 1.77M4.93 17.07l1.77-1.77M15.3 6.7l1.77-1.77" stroke="#FF7B27" stroke-width="1.75" stroke-linecap="round"/></svg>
+            </div>
+            <h3 class="font-heading font-bold track-tight" style="font-size:1.25rem;margin-bottom:0.75rem;color:white;">Agents IA sur mesure</h3>
+            <p style="color:#8A9299;line-height:1.75;font-size:0.9375rem;">Des solutions adaptées à votre secteur, vos données et vos objectifs — pas des templates génériques.</p>
+          </div>
+        </div>
+
+        <!-- Card 3 — Light -->
+        <div class="service-card rounded-2xl p-8 bg-white shadow-card" style="border:1px solid rgba(52,67,94,0.08);">
+          <div style="width:48px;height:48px;border-radius:14px;background:rgba(74,109,156,0.10);display:flex;align-items:center;justify-content:center;margin-bottom:1.5rem;">
+            <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M4 11h14M4 6h14M4 16h9" stroke="#4A6D9C" stroke-width="1.75" stroke-linecap="round"/></svg>
+          </div>
+          <h3 class="font-heading font-bold text-primary track-tight" style="font-size:1.25rem;margin-bottom:0.75rem;">Intégrations intelligentes</h3>
+          <p style="color:#8A9299;line-height:1.75;font-size:0.9375rem;">Connectez vos outils existants sans friction — CRM, ERP, email, Slack et 500+ applications.</p>
+        </div>
+
+        <!-- Card 4 — Light -->
+        <div class="service-card rounded-2xl p-8 bg-white shadow-card" style="border:1px solid rgba(52,67,94,0.08);">
+          <div style="width:48px;height:48px;border-radius:14px;background:rgba(255,123,39,0.10);display:flex;align-items:center;justify-content:center;margin-bottom:1.5rem;">
+            <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M3 19h16M6 19V9l5-5 5 5v10M9 19v-5h4v5" stroke="#FF7B27" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <h3 class="font-heading font-bold text-primary track-tight" style="font-size:1.25rem;margin-bottom:0.75rem;">Conseil & Stratégie IA</h3>
+          <p style="color:#8A9299;line-height:1.75;font-size:0.9375rem;">Définissez la bonne feuille de route — on identifie les gains rapides et les opportunités long terme.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════ PROCESSUS ═══════════════ -->
+  <section id="processus" class="relative noise-layer py-28 overflow-hidden" style="background:#1E3A52;">
+    <div class="absolute inset-0 pointer-events-none" aria-hidden="true">
+      <div style="position:absolute;top:0;left:0;width:600px;height:450px;background:radial-gradient(ellipse,rgba(255,123,39,0.09) 0%,transparent 65%);"></div>
+      <div style="position:absolute;bottom:0;right:0;width:500px;height:400px;background:radial-gradient(ellipse,rgba(74,109,156,0.18) 0%,transparent 65%);"></div>
+    </div>
+
+    <div class="relative z-10 max-w-6xl mx-auto px-6">
+      <!-- Section header -->
+      <div style="text-align:center;margin-bottom:4rem;">
+        <div style="display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border-radius:9999px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);margin-bottom:1.25rem;">
+          <span style="font-size:0.6875rem;font-weight:700;color:#FF7B27;letter-spacing:0.1em;text-transform:uppercase;font-family:'Outfit',sans-serif;">Notre processus</span>
+        </div>
+        <h2 class="font-heading font-bold track-tight" style="font-size:clamp(1.875rem,3.5vw,2.75rem);color:white;margin-bottom:1rem;line-height:1.12;">
+          De l'idée au déploiement<br>en 3 étapes
+        </h2>
+        <p style="color:#8A9299;line-height:1.75;max-width:34rem;margin:0 auto;">
+          Un processus structuré pour des résultats mesurables dès les premières semaines.
+        </p>
+      </div>
+
+      <!-- Steps -->
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;">
+
+        <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.09);border-radius:20px;padding:2rem;">
+          <div class="font-heading font-extrabold track-tight" style="font-size:3.5rem;color:#FF7B27;opacity:0.22;line-height:1;margin-bottom:1.25rem;">01</div>
+          <h3 class="font-heading font-bold track-tight" style="font-size:1.25rem;color:white;margin-bottom:0.75rem;">Analyse</h3>
+          <p style="color:#8A9299;line-height:1.75;font-size:0.9375rem;">On cartographie vos processus, identifie les goulots d'étranglement et priorise les gains rapides.</p>
+        </div>
+
+        <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.09);border-radius:20px;padding:2rem;">
+          <div class="font-heading font-extrabold track-tight" style="font-size:3.5rem;color:#FF7B27;opacity:0.22;line-height:1;margin-bottom:1.25rem;">02</div>
+          <h3 class="font-heading font-bold track-tight" style="font-size:1.25rem;color:white;margin-bottom:0.75rem;">Construction</h3>
+          <p style="color:#8A9299;line-height:1.75;font-size:0.9375rem;">On développe et déploie vos agents IA sur mesure — prototype en 48h, solution complète en quelques semaines.</p>
+        </div>
+
+        <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.09);border-radius:20px;padding:2rem;">
+          <div class="font-heading font-extrabold track-tight" style="font-size:3.5rem;color:#FF7B27;opacity:0.22;line-height:1;margin-bottom:1.25rem;">03</div>
+          <h3 class="font-heading font-bold track-tight" style="font-size:1.25rem;color:white;margin-bottom:0.75rem;">Optimisation</h3>
+          <p style="color:#8A9299;line-height:1.75;font-size:0.9375rem;">On mesure les résultats, affine les modèles et améliore en continu pour maximiser votre ROI.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════ À PROPOS ═══════════════ -->
+  <section id="apropos" class="py-28 relative overflow-hidden">
+    <div class="max-w-6xl mx-auto px-6 grid md:grid-cols-2 gap-16 items-center">
+      <div>
+        <div style="display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border-radius:9999px;background:rgba(52,67,94,0.07);border:1px solid rgba(52,67,94,0.12);margin-bottom:1.25rem;">
+          <span style="font-size:0.6875rem;font-weight:700;color:#34435E;letter-spacing:0.1em;text-transform:uppercase;font-family:'Outfit',sans-serif;">Notre mission</span>
+        </div>
+        <h2 class="font-heading font-bold text-primary track-tight" style="font-size:clamp(1.875rem,3.5vw,2.5rem);line-height:1.12;margin-bottom:1.5rem;">
+          Rendre l'IA accessible<br>à toutes les entreprises
+        </h2>
+        <p style="color:#424F4A;line-height:1.78;margin-bottom:1.25rem;font-size:1rem;">
+          Chez Radiant AI, on croit que l'intelligence artificielle ne devrait pas être réservée aux grandes entreprises. Chaque organisation mérite des outils qui travaillent pour elle — pas l'inverse.
+        </p>
+        <p style="color:#8A9299;line-height:1.78;font-size:0.9375rem;">
+          Notre approche : comprendre d'abord, construire ensuite. On ne vend pas de solutions pré-packagées. On écoute vos enjeux, on cartographie vos processus et on construit ce qui a vraiment du sens pour vous.
+        </p>
+      </div>
+      <!-- Values grid -->
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:1rem;">
+        <div style="padding:1.5rem;background:white;border-radius:16px;border:1px solid rgba(52,67,94,0.08);" class="shadow-card">
+          <div style="font-size:1.5rem;margin-bottom:0.5rem;">⚡</div>
+          <div class="font-heading font-semibold text-primary" style="font-size:0.9375rem;margin-bottom:0.25rem;">Rapidité</div>
+          <div style="font-size:0.8125rem;color:#8A9299;line-height:1.6;">Prototype en 48h, pas en 6 mois.</div>
+        </div>
+        <div style="padding:1.5rem;background:white;border-radius:16px;border:1px solid rgba(52,67,94,0.08);" class="shadow-card">
+          <div style="font-size:1.5rem;margin-bottom:0.5rem;">🎯</div>
+          <div class="font-heading font-semibold text-primary" style="font-size:0.9375rem;margin-bottom:0.25rem;">Précision</div>
+          <div style="font-size:0.8125rem;color:#8A9299;line-height:1.6;">Des solutions ciblées, sans complexité inutile.</div>
+        </div>
+        <div style="padding:1.5rem;background:white;border-radius:16px;border:1px solid rgba(52,67,94,0.08);" class="shadow-card">
+          <div style="font-size:1.5rem;margin-bottom:0.5rem;">🔒</div>
+          <div class="font-heading font-semibold text-primary" style="font-size:0.9375rem;margin-bottom:0.25rem;">Fiabilité</div>
+          <div style="font-size:0.8125rem;color:#8A9299;line-height:1.6;">Des systèmes robustes qui tournent sans supervision.</div>
+        </div>
+        <div style="padding:1.5rem;background:white;border-radius:16px;border:1px solid rgba(52,67,94,0.08);" class="shadow-card">
+          <div style="font-size:1.5rem;margin-bottom:0.5rem;">📈</div>
+          <div class="font-heading font-semibold text-primary" style="font-size:0.9375rem;margin-bottom:0.25rem;">ROI mesurable</div>
+          <div style="font-size:0.8125rem;color:#8A9299;line-height:1.6;">On mesure l'impact réel dès le premier mois.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════ TÉMOIGNAGES ═══════════════ -->
+  <section id="temoignages" class="py-28 relative overflow-hidden" style="background:rgba(52,67,94,0.03);">
+    <div class="max-w-6xl mx-auto px-6">
+      <div style="text-align:center;margin-bottom:4rem;">
+        <div style="display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border-radius:9999px;background:rgba(52,67,94,0.07);border:1px solid rgba(52,67,94,0.12);margin-bottom:1.25rem;">
+          <span style="font-size:0.6875rem;font-weight:700;color:#34435E;letter-spacing:0.1em;text-transform:uppercase;font-family:'Outfit',sans-serif;">Témoignages</span>
+        </div>
+        <h2 class="font-heading font-bold text-primary track-tight" style="font-size:clamp(1.875rem,3.5vw,2.75rem);line-height:1.12;">
+          Ce que disent nos clients
+        </h2>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem;">
+
+        <!-- T1 -->
+        <div class="rounded-2xl p-8 bg-white shadow-card" style="border:1px solid rgba(52,67,94,0.08);">
+          <div style="display:flex;gap:3px;margin-bottom:1.25rem;">
+            <svg width="16" height="16" fill="#FF7B27" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+            <svg width="16" height="16" fill="#FF7B27" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+            <svg width="16" height="16" fill="#FF7B27" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+            <svg width="16" height="16" fill="#FF7B27" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+            <svg width="16" height="16" fill="#FF7B27" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+          </div>
+          <p style="color:#424F4A;line-height:1.75;font-size:0.9375rem;margin-bottom:1.5rem;">"Radiant AI a automatisé notre processus de qualification de leads. On gagne 15 heures par semaine et nos commerciaux se concentrent sur ce qui compte."</p>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div style="width:36px;height:36px;border-radius:50%;background:rgba(52,67,94,0.10);display:flex;align-items:center;justify-content:center;font-family:'Outfit',sans-serif;font-weight:700;color:#34435E;font-size:0.8125rem;flex-shrink:0;">ML</div>
+            <div>
+              <div class="font-heading font-semibold text-primary" style="font-size:0.875rem;">Marie L.</div>
+              <div style="font-size:0.75rem;color:#8A9299;">Directrice commerciale</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- T2 -->
+        <div class="rounded-2xl p-8 bg-white shadow-card" style="border:1px solid rgba(52,67,94,0.08);">
+          <div style="display:flex;gap:3px;margin-bottom:1.25rem;">
+            <svg width="16" height="16" fill="#FF7B27" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+            <svg width="16" height="16" fill="#FF7B27" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+            <svg width="16" height="16" fill="#FF7B27" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+            <svg width="16" height="16" fill="#FF7B27" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+            <svg width="16" height="16" fill="#FF7B27" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+          </div>
+          <p style="color:#424F4A;line-height:1.75;font-size:0.9375rem;margin-bottom:1.5rem;">"L'agent de reporting qu'ils ont développé nous a sauvé 2 jours de travail par mois. L'implémentation a été rapide et sans friction."</p>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div style="width:36px;height:36px;border-radius:50%;background:rgba(255,123,39,0.10);display:flex;align-items:center;justify-content:center;font-family:'Outfit',sans-serif;font-weight:700;color:#FF7B27;font-size:0.8125rem;flex-shrink:0;">TD</div>
+            <div>
+              <div class="font-heading font-semibold text-primary" style="font-size:0.875rem;">Thomas D.</div>
+              <div style="font-size:0.75rem;color:#8A9299;">CFO, Scale-up SaaS</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- T3 -->
+        <div class="rounded-2xl p-8 bg-white shadow-card" style="border:1px solid rgba(52,67,94,0.08);">
+          <div style="display:flex;gap:3px;margin-bottom:1.25rem;">
+            <svg width="16" height="16" fill="#FF7B27" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+            <svg width="16" height="16" fill="#FF7B27" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+            <svg width="16" height="16" fill="#FF7B27" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+            <svg width="16" height="16" fill="#FF7B27" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+            <svg width="16" height="16" fill="#FF7B27" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+          </div>
+          <p style="color:#424F4A;line-height:1.75;font-size:0.9375rem;margin-bottom:1.5rem;">"En 3 semaines, ils ont livré un agent qui traite nos demandes clients automatiquement. Notre équipe support se concentre sur les cas complexes."</p>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div style="width:36px;height:36px;border-radius:50%;background:rgba(74,109,156,0.10);display:flex;align-items:center;justify-content:center;font-family:'Outfit',sans-serif;font-weight:700;color:#4A6D9C;font-size:0.8125rem;flex-shrink:0;">SR</div>
+            <div>
+              <div class="font-heading font-semibold text-primary" style="font-size:0.875rem;">Sophie R.</div>
+              <div style="font-size:0.75rem;color:#8A9299;">Head of Operations</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════ CTA FINAL ═══════════════ -->
+  <section id="contact" class="relative noise-layer py-24 overflow-hidden" style="background:#34435E;">
+    <div class="absolute inset-0 pointer-events-none" aria-hidden="true">
+      <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:800px;height:400px;background:radial-gradient(ellipse,rgba(255,123,39,0.14) 0%,transparent 60%);"></div>
+    </div>
+    <div class="relative z-10 max-w-2xl mx-auto px-6 text-center">
+      <h2 class="font-heading font-bold track-tight" style="font-size:clamp(2rem,4vw,3rem);color:white;line-height:1.08;margin-bottom:1.25rem;">
+        Prêt à transformer<br>votre entreprise ?
+      </h2>
+      <p style="color:#8A9299;line-height:1.75;margin-bottom:2.5rem;font-size:1rem;">
+        En 30 minutes, on identifie ensemble les premières opportunités d'automatisation pour votre activité.
+      </p>
+      <a href="mailto:samuelgoyet16@gmail.com" class="btn-accent shadow-accent">
+        Commencer maintenant
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2.5 8h11M9.5 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════ FOOTER ═══════════════ -->
+  <footer style="padding:2.5rem 0;border-top:1px solid rgba(52,67,94,0.10);">
+    <div class="max-w-6xl mx-auto px-6" style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:1.5rem;">
+      <a href="#" aria-label="Retour en haut">
+        <img src="brand_assets/logo-transparent.png" alt="Radiant AI" style="height:44px;width:auto;opacity:0.9;" />
+      </a>
+      <nav style="display:flex;align-items:center;gap:2rem;">
+        <a href="#services"    class="nav-link" style="font-size:0.75rem;color:#8A9299;">Services</a>
+        <a href="#processus"   class="nav-link" style="font-size:0.75rem;color:#8A9299;">Processus</a>
+        <a href="#temoignages" class="nav-link" style="font-size:0.75rem;color:#8A9299;">Clients</a>
+        <a href="#contact"     class="nav-link" style="font-size:0.75rem;color:#8A9299;">Contact</a>
+      </nav>
+      <p style="font-size:0.75rem;color:#8A9299;">© 2025 Radiant AI. Tous droits réservés.</p>
+    </div>
+  </footer>
+
+</body>
+</html>
